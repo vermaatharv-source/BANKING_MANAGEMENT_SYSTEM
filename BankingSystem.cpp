@@ -19,23 +19,23 @@ class account{
         cout<<"-----------------"<<endl;
     }
 };
+
 // MEMBER CLASS INHERITING ACCOUNT CLASS, HEIRARCHICAL INHERITANCE WITH ACCOUNT CLASS
 class member : public account {
-    private: // ECAPSULATION OF PASSWORD DATA MEMBER
+    private: // ENCAPSULATION OF PASSWORD DATA MEMBER
     string password;
     public:
-    
     long long int balance;
 
-    // INHERITANCE OF ACCOUNT CLASS CONSTRUCTOR
+    // CONSTRUCTOR TO INITIALIZE THE MEMBER OBJECT WITH NAME, ID, PASSWORD AND BALANCE
     member(string name, long int id, string password, long long int balance) : account(name, id) {
         this->password = password;
         this->balance = balance;
     }
-    string get_password() const {
+    string get_password() const { // GETTER FUNCTION TO ACCESS THE PRIVATE PASSWORD DATA MEMBER
         return password;
     }
-    string display_password() const {
+    string display_password() const { // FUNCTION TO DISPLAY PASSWORD IN ENCRYPTED FORM FOR SECURITY REASONS
         return password;
     }
     void set_password(string new_password){
@@ -51,13 +51,13 @@ class member : public account {
     }
 };
 // ADMIN CLASS INHERITING ACCOUNT CLASS, HIERARCHICAL INHERITANCE WITH ACCOUNT CLASS
-class admin : public account {
+class admin : public account { 
     
     public:
 
-    admin(string name, long int id) : account(name, id) {
+    admin(string name, long int id) : account(name, id) { // CONSTRUCTOR TO INTIALIZE THE ADMIN OBJECT WITH NAME AND ID AND INHERIT THE NAME AND ID FROM ACCOUNT CLASS
     }
-
+    
     void display() {
         cout << "ADMIN NAME: " << name << endl;
         cout << "ADMIN ID: " << id << endl;
@@ -72,10 +72,9 @@ public:
     string password;
     long long int amount;
 
-    Loan(string name, long int id, string password, long long int amount){
+    Loan(string name, long int id, long long int amount){
         this->name = name;
         this->id = id;
-        this->password = password;
         this->amount = amount;
 
     }
@@ -118,6 +117,7 @@ public:
     vector<admin> admin_acc;
     vector<Loan> loan_applications;
     vector<transaction> transaction_history;
+
     // POINTER TO TRACK THE LOGGED IN MEMBER FOR MEMBER-SPECIFIC OPERATIONS
     member* loggedInMember = nullptr;
 
@@ -125,9 +125,11 @@ public:
     void add_member(string name, long int id, string password, long long int balance) {
         member_acc.push_back(member(name, id, password, balance));
     }
+    // FUNCTION TO ADD ADMIN LOGIN CREDENTIALS TO ADMIN VECTOR DATABASE
     void add_admin(string name, long int id) {
         admin_acc.push_back(admin(name, id));
     }
+    // HANDLES ADMIN LOGIN BY VERIFYING THE ENTERED ID WITH THE ADMIN VECTOR DATABASE, ALLOWS MAXIMUM 3 ATTEMPTS FOR LOGIN
     bool admin_login(){
         long int id;
         cout<<"PLEASE ENTER YOUR FOUR DIGIT ACCESS CODE: ";
@@ -136,7 +138,8 @@ public:
             for(admin &a : admin_acc){
                 if(a.id==id){
                 cout<<"ACCESS CODE VERIFIED!!!"<<endl;
-                cout<<"WELCOME "<<a.name<<endl;
+                cout<<"\n\033[1mWELCOME "<<a.name<<"\033[0m"<<endl;
+                cout<<"------------------------------"<<endl;
                 return true;
                 }
 
@@ -150,11 +153,23 @@ public:
         }
         return false;
     }
+    // HANDLES MEMBER LOGIN BY VERIFYING THE ENTERED ID AND PASSWORD WITH THE MEMBER VECTOR DATABASE, ALLOWS MAXIMUM 3 ATTEMPTS FOR LOGIN, SETS THE LOGGED IN MEMBER POINTER TO THE SUCCESSFULLY LOGGED IN MEMBER FOR MEMBER-SPECIFIC OPERATIONS
     bool member_login() {
     long int id;
     string password;
     cout << "PLEASE ENTER YOUR ACCOUNT ID: ";
     cin >> id;
+    bool memberid = false;
+    for(member &m : member_acc){
+        if(m.id == id){
+            memberid = true;
+            break;
+        }
+    }
+    if(memberid != true){
+        cout<<"MEMBER ID DOES NOT EXISTS IN THE DATABASE, ACCOUNT LOGIN FAILED!!!"<<endl;
+        exit(0);
+    }
     cin.ignore(); // clear newline left by cin >>
     for (int i = 1; i <= 3; i++) {
         cout << "PLEASE ENTER YOUR PASSWORD: ";
@@ -162,7 +177,8 @@ public:
         for (member &m : member_acc) { //FOR LOOP FOR VECTOR TO LOOP THROUGH MEMBER ACCOUNTS TO VERIFY CREDENTIALS
             if (m.id == id && m.get_password() == password) {
                 cout << "LOGIN SUCCESSFUL!!!" << endl;
-                cout << "WELCOME " << m.name << endl;
+                cout << "\n\033[1mWELCOME " << m.name <<"\033[0m\n"<<endl;
+                cout<<"--------------------------\n"<<endl;
                 loggedInMember = &m; // SET THE LOGGED IN MEMBER
                 return true;
             }
@@ -176,6 +192,7 @@ public:
     }
     return false;
 }
+    // FUNCTION TO DELETE MEMBER ACCOUNT BY VERIFICATION OF ACCOUNT ID
     bool delete_member_acc(){
         long int id;
         cout<<"PLEASE ENTER THE ID OF THE ACCOUNT TO BE DELETED: ";
@@ -193,22 +210,25 @@ public:
         cout<<"ACCOUNT NOT FOUND!!! DELETE FAILED!!!"<<endl;
         return false;
 }
+    // FUNCTION TO DISPLAY ALL MEMBER ACCOUNTS
     void display_all_member_accounts(){
         cout<<"ALL MEMBER ACCOUNTS: "<<endl;
         for(member &m : member_acc){
             m.display();
         }
 }
+    // FUNCTION TO DISPLAY ALL ADMIN ACCOUNTS
     void display_all_admin_accounts(){
         cout<<"ALL ADMIN ACCOUNTS: "<<endl;
         for(admin &a : admin_acc){
             a.display();
         }
 }
+    // FUNCTION TO SEARCH ACCOUNT BY ID AND DISPLAY THE ACCOUNT DETAILS IF FOUND
     bool search_account_by_id(long int id){
         for(member &m : member_acc){
             if(m.id==id){
-                cout<<"MEMBER ACCOUNT EXISTS HAVING FOLLOWING CREDENTIALS: ";
+                cout<<"MEMBER ACCOUNT EXISTS HAVING FOLLOWING CREDENTIALS: \n"<<endl;
                 m.display();
                 return true;
             }
@@ -216,6 +236,7 @@ public:
         cout<<"NO MEMBER ACCOUNT EXISTS WITH THE ENTERED ID!!!"<<endl;
         return false;
 }
+    // FUNCTION TO CONVERT LOWERCASE CHARACTERS TO UPPERCASE
         string toUppercase(string s){
         for (size_t i = 0; i < s.length(); ++i) {
         if (s[i] >= 97 && s[i] <= 122) {
@@ -233,9 +254,10 @@ public:
                 return true;
             }
         }
-        cout<<"THE FOLLOWING ID DOES NOT EXISTS!!!";
+        cout<<"THE FOLLOWING ACCOUNT DOES NOT EXISTS!!!";
         return false;
-    }
+}
+    // FUNCTION TO UPDATE MEMBER DETAILS, ALLOWS TO UPDATE NAME AND PASSWORD
     bool update_member_details(){
         long int id;
         int choice;
@@ -296,7 +318,7 @@ public:
         cout<<"NO MEMBER ACCOUNT EXISTS WITH THE ENTERED ID!!! UPDATE FAILED!!!"<<endl;
         return false;
 }
-
+    // FUNCTION TO DISPLAY MEMBER PASSWORD, BY VERIFICATION OF ACCOUNT ID, FOR ADMIN USE ONLY
     bool member_password(){
         long int id;
         cout<<"PLEASE ENTER THE ACCOUNT ID TO CHECK PASSWORD: ";
@@ -311,6 +333,7 @@ public:
         }
         return false;
 }
+    // FUNCTION TO APPLY FOR LOAN, POINTER SAVES THE LOGGED IN MEMBER DETAILS TO USE IN LOAN APPLICATION AND STORE THE DETAILS IN THE VECTOR DATABASE OF LOAN APPLICATIONS
     void apply_loan() {
     if (loggedInMember == nullptr) {
         cout << "ERROR: No member is currently logged in!" << endl;
@@ -322,12 +345,13 @@ public:
 
     // Use logged-in member’s details directly
     loan_applications.push_back(
-        Loan(loggedInMember->name, loggedInMember->id, loggedInMember->get_password(), amount)
+        Loan(loggedInMember->name, loggedInMember->id, amount)
     );
     cout << "LOAN APPLICATION SUCCESSFULLY GENERATED FOR " 
          << loggedInMember->name << "!!!" << endl;
 }
-    void approve_loan_application() {
+    // FUNCTION TO APPROVE LOAN APPLICATION
+    bool approve_loan_application() {
     long int id;
     cout << "PLEASE ENTER THE MEMBER ID FOR LOAN APPROVAL: ";
     cin >> id;
@@ -336,21 +360,25 @@ public:
         if (loan_applications[i].id == id) {
             cout << "LOAN APPLICATION FOUND: " << endl;
             for (member &m : member_acc) {
-                if (m.id == id && m.get_password() == loan_applications[i].password) {
+                if (m.id == id) {
                     m.balance += loan_applications[i].amount;
                     cout << "LOAN APPROVED!!! BALANCE UPDATED." << endl;
                     loan_applications.erase(loan_applications.begin() + i);
+                    return true;
                 }
             }
         }
     }
+    cout<<"ACCOUNT ID DOES NOT EXIST FOR LOAN APPLICATION APPROVAL, HENCE PROCESS FAILED"<<endl;
+    return false;
 }
+    // FUNCTION TO REJECT LOAN APPLICATION
     bool reject_loan_application() {
     long int id;
     cout << "PLEASE ENTER THE MEMBER ID FOR LOAN REJECTION: ";
     cin >> id;
 
-    for (size_t i = 0; i < loan_applications.size(); i++) {
+    for (size_t i = 0; i < loan_applications.size(); i++) { //USED SIZE_T FOR FOR UNSIGNED INTEGER TO AVOID SIGNED-UNSIGNED COMPARISON WARNING
         if (loan_applications[i].id == id) {
             cout << "LOAN APPLICATION FOUND: " << endl;
             loan_applications[i].display();
@@ -359,15 +387,20 @@ public:
             return true;
         }
     }
-    cout << "NO LOAN APPLICATION FOUND WITH ENTERED ID!!!" << endl;
+    cout << "ACCOUNT ID DOES NOT EXIST FOR LOAN APPLICATION APPROVAL, HENCE PROCESS FAILED" << endl;
     return false;
 }
+    // FUNCTION TO DISPLAY ALL LOAN APPLICATIONS, FOR ADMIN USE ONLY
     void display_all_loan_applications() {
     cout << "ALL LOAN APPLICATIONS: " << endl;
     for (Loan &l : loan_applications){
+        if(loan_applications.empty()){
+            cout<<"NO PENDING LOAN APPLICATIONS"<<endl;
+        }
         l.display();
     }
 }
+    // FUNCTION TO MANAGE LOAN APPLICATIONS, ALLOWS ADMIN TO APPROVE OR REJECT LOAN APPLICATIONS
     void manage_loan_application() {
         display_all_loan_applications();
         if(loan_applications.empty()){
@@ -389,8 +422,10 @@ public:
             cout<<"INVALID OPTION SELECTED!!! PLEASE TRY AGAIN!!!"<<endl;
         }
 }
+    // FUNCTION TO ASK USER IF THEY WISH TO CONTINUE USING THE PORTAL SERVICES AFTER COMPLETION OF AN OPERATION, RETURNS TRUE FOR CONTINUATION AND FALSE FOR EXITING THE PORTAL
     bool looping_system(){
         int choice;
+        cout<<"--------------------------------------------------"<<endl;
         cout<<"DO U WISH TO CONTINUE THE FUNCTIONS IN PORTAL: "<<endl;
         cout<<"1. YES"<<endl;
         cout<<"2. NO"<<endl;
@@ -425,19 +460,17 @@ public:
         }
         cout<<"LOAN APPLICATION STATUS FOR "<<loggedInMember->name<<": "<<endl;
         for (Loan &l : loan_applications) {
-        if (l.id == loggedInMember->id && l.password == loggedInMember->get_password()) {
+            if (l.id == loggedInMember->id ) {
             cout << "LOAN APPLICATION PENDING WITH FOLLOWING DETAILS: " << endl;
             l.display();
             return true;
         }
     }
 
-    cout << "NO PENDING LOAN APPLICATION FOUND FOR YOUR ACCOUNT!!!" << endl;
+    cout << "NO PENDING LOAN APPLICATIONS FOUND FOR THE CURRENT LOGGED IN MEMBER ACCOUNT: "<<loggedInMember->name<< endl;
     return false;
-    }
-
-    
-bool deposit_money() {
+}
+    bool deposit_money() {
     if (loggedInMember == nullptr) {
         cout << "ERROR: NO MEMBER IS CURRENTLY LOGGED IN!!!" << endl;
         return false;
@@ -460,7 +493,7 @@ bool deposit_money() {
 
     return true;
 }
-bool withdraw_money() {
+    bool withdraw_money() {
     if (loggedInMember == nullptr) {
         cout << "ERROR: NO MEMBER IS CURRENTLY LOGGED IN!!!" << endl;
         return false;
@@ -487,7 +520,7 @@ bool withdraw_money() {
 
     return true;
 }
-bool check_balance() {
+    bool check_balance() {
     if (loggedInMember == nullptr) {
         cout << "ERROR: NO MEMBER IS CURRENTLY LOGGED IN!!!" << endl;
         return false;
@@ -496,7 +529,7 @@ bool check_balance() {
     cout << "CURRENT ACCOUNT BALANCE: " << loggedInMember->balance << endl;
     return true;
 }
-bool transfer_money() {
+    bool transfer_money() {
     if (loggedInMember == nullptr) {
         cout << "ERROR: NO MEMBER IS CURRENTLY LOGGED IN!!!" << endl;
         return false;
@@ -552,7 +585,7 @@ bool transfer_money() {
 
     return true;
 }
-bool change_member_password() {
+    bool change_member_password() {
 
     // Step 1: Check login
     if (loggedInMember == nullptr) {
@@ -581,12 +614,15 @@ bool change_member_password() {
     cout << "CONFIRM NEW PASSWORD: ";
     getline(cin, confirm_password);
 
+    if(loggedInMember->get_password() == new_password){
+        cout<<"YOU HAVE ENETERED YOUR PREVIOUS ACCOUNT PASSWORD AS THE NEW ONE!! ACCOUNT UPDATION FAILED"<<endl;
+        return false;
+    }
     // Step 4: Match confirmation
     if (new_password != confirm_password) {
         cout << "PASSWORDS DO NOT MATCH!!!" << endl;
         return false;
     }
-
     // Step 5: Update password
     loggedInMember->set_password(new_password);
 
@@ -610,26 +646,37 @@ bool change_member_password() {
             
         }
         return true;
-    }
+}
     void generate_report() {
-        cout << "ALL MEMBER ACCOUNTS: " << endl;
+        cout << "\nALL MEMBER ACCOUNTS: " << endl;
+        cout<<"--------------------------\n"<<endl;
         for (member &m : member_acc) {
             m.display();
         }
-        cout << "ALL ADMIN ACCOUNTS: " << endl;
+        cout << "\nALL ADMIN ACCOUNTS: " << endl;
+        cout<<"--------------------------\n"<<endl;
         for (admin &a : admin_acc) {
             a.display();
         }
-        cout << "ALL LOAN APPLICATIONS: " << endl;
-        for (Loan &l : loan_applications) {
-            l.display();
+        cout << "\nALL LOAN APPLICATIONS: " << endl;
+        cout<<"--------------------------\n"<<endl;
+        if(loan_applications.empty()){
+            cout<<"NO PENDING LOAN APPLICATIONS FOR THIS BRANCH"<<endl;
+        } else {
+            for(Loan l : loan_applications){
+                l.display();
+            }
         }
-        cout << "ALL TRANSACTIONS: " << endl;
-        for (transaction &t : transaction_history) {
-            t.display_transaction();
+        cout << "\nALL TRANSACTIONS: " << endl;
+        cout<<"--------------------------\n"<<endl;
+        if(transaction_history.empty()){
+            cout<<"NO TRANSACTION HISTORY COULD BE GENERATED FOR THIS BRANCH"<<endl;
+        } else {
+            for(transaction t : transaction_history){
+                t.display_transaction();
+            }
         }
-
-    }
+}
     void create_member_account() {
     string name, password;
     long int id;
@@ -658,11 +705,10 @@ bool change_member_password() {
 
     name = toUppercase(name);
 
-    member_acc.push_back(member(name, id, password, balance));
+    member_acc.emplace_back(name, id, password, balance);
 
     cout << "MEMBER ACCOUNT CREATED SUCCESSFULLY!!!" << endl;
 }
-
 };
 
 int main() {
@@ -721,30 +767,27 @@ int main() {
     b.add_member("KHUSHI CHAUHAN", 1108, "khushi", 77360);
     b.add_member("HARSHIT SHARMA", 1109, "harshit", 79750);
     b.add_member("ADHIRAJ MAHESHWARI", 1110, "adhiraj", 77140);
-    b.add_member("NAYAN KUMAR JHA", 1283, "nayan", 78420);
-    b.add_member("ADITYA SHUKLA", 1284, "aditya", 76860);
-    b.add_member("KUMARI ANSHIKA", 1285, "anshika", 75430);
-    b.add_member("GARGI GUPTA", 1286, "gargi", 79560);
-    b.add_member("UJJWAL SINGH", 1287, "ujjwal", 76320);
-    b.add_member("VIDHAN TYAGI", 1288, "vidhan", 78240);
     // VECTOR(ADMIN) DATABASE
     b.add_admin("SHASHWAT BHATT", 1056);
     b.add_admin("ATHARV VERMA", 1060);
     b.add_admin("ABHINAV GARG", 1068);
     b.add_admin("VIBHOR SINGH", 1073);
-    // MAIN CODE:2
+    // MAIN CODE:
+    // USED WHILE TRUE LOOP FOR THE CONTINUATION OF THE PROGRAM UNTIL THE USER DECIDES TO EXIT THE PORTAL
     while(true){
+        // ASCII CODE INSIDE WELCOME MESSAGE
     cout << "\n\033[1;32mWELCOME TO THE BANK MANAGEMENT SYSTEM\033[0m\n" << endl;
     cout << "PLEASE SELECT YOUR DESIGNATION: " << endl;
     cout << "1. ADMIN \n2. MEMBER" << endl;
     cout << "PLEASE SELECT YOUR TYPE OF LOGIN: ";
+    // CHOICE OF SELECTION FOR ADMIN OR MEMBER LOGIN
     cin >> choice;
     if (choice == 1) {
         b.admin_login();
         string menu[] = { "1. ADD MEMBER ACCOUNT", "2. DELETE MEMBER ACCOUNT", "3. DISPLAY ALL ACCOUNTS", "4. SEARCH ACCOUNT BY ID",
-        "5. SEARCH ACCOUNT BY NAME", "6. UPDATE MEMBER DETAILS","7. VIEW MEMBER PASSWORD", "8. MANAGE LOAN APPLICATION", "9. GENERATE BRANCH REPORT",
-        "10. LOG OUT" };
-        for (int i = 0; i < 10; i++) {
+        "5. SEARCH ACCOUNT BY NAME", "6. UPDATE MEMBER DETAILS","7. MANAGE LOAN APPLICATION", "8. GENERATE BRANCH REPORT",
+        "9. LOG OUT" };
+        for (int i = 0; i < 9; i++) {
             cout << menu[i] << endl;
         }
         cout << "PLEASE SELECT THE OPERATION TO BE PERFORMED: ";
@@ -781,29 +824,25 @@ int main() {
             b.looping_system();
             break;
             case 7:
-            b.member_password();
-            b.looping_system();
-            break;
-            case 8:
             b.manage_loan_application();
             b.looping_system();
             break;
-            case 9:
+            case 8:
             b.generate_report();
             b.looping_system();
             break;
-            case 10:
+            case 9:
             cout<<"THANKS FOR USING THE BANK MANAGEMENT SYSTEM!!! LOGGING OUT!!!"<<endl;
             exit(0);
             break;
 
         }
-        
+
     } else if(choice==2){
         b.member_login();
-        string menu[] = { "1. VIEW ACCOUNT DETAILS", "2. UPDATE ACCOUNT DETAILS", "3. APPLY FOR LOAN", "4. VIEW LOAN APPLICATION STATUS",
-             "5. DEPOSIT MONEY","6. WITHDRAW MONEY","7. CHECK BALANCE","8. TRANSFER MONEY","9. VIEW TRANSACTION HISTORY","10. CHANGE PASSWORD", "11. LOG OUT" };
-             for(int i=0; i<11; i++){
+        string menu[] = { "1. VIEW ACCOUNT DETAILS","2. APPLY FOR LOAN", "3. VIEW LOAN APPLICATION STATUS",
+             "4. DEPOSIT MONEY","5. WITHDRAW MONEY","6. CHECK BALANCE","7. TRANSFER MONEY","8. VIEW TRANSACTION HISTORY","9. CHANGE PASSWORD", "10. LOG OUT" };
+             for(int i=0; i<10; i++){
                 cout<<menu[i]<<endl;
             }
             cout << "PLEASE SELECT THE OPERATION TO BE PERFORMED: ";
@@ -814,42 +853,38 @@ int main() {
                 b.looping_system();
                 break;
                 case 2:
-                b.update_member_details();
-                b.looping_system();
-                break;
-                case 3:
                 b.apply_loan();
                 b.looping_system();
                 break;
-                case 4:
+                case 3:
                 b.view_loan_status();
                 b.looping_system();
                 break;
-                case 5:
+                case 4:
                 b.deposit_money();
                 b.looping_system();
                 break;
-                case 6:
+                case 5:
                 b.withdraw_money();
                 b.looping_system();
                 break;
-                case 7:
+                case 6:
                 b.check_balance();
                 b.looping_system();
                 break;
-                case 8:
+                case 7:
                 b.transfer_money();
                 b.looping_system();
                 break;
-                case 9:
+                case 8:
                 b.view_transaction_history();
                 b.looping_system();
                 break;
-                case 10:
+                case 9:
                 b.change_member_password();
                 b.looping_system();
                 break;
-                case 11:
+                case 10:
                 cout<<"THANKS FOR USING THE BANK MANAGEMENT SYSTEM!!! LOGGING OUT!!!"<<endl;
                 exit(0);
                 break;
